@@ -20,6 +20,7 @@ namespace Nightmare
         EnemyHealth enemyHealth;
         NavMeshAgent nav;
         public float timer = 0f;
+        private bool playerDetected;
 
         void Awake ()
         {
@@ -27,6 +28,7 @@ namespace Nightmare
             playerHealth = player.GetComponent <PlayerHealth> ();
             enemyHealth = GetComponent <EnemyHealth> ();
             nav = GetComponent<NavMeshAgent>();
+            EventManager.StartListening("Sound", HearPoint);
 
             StartPausible();
         }
@@ -36,7 +38,6 @@ namespace Nightmare
             nav.enabled = true;
             ClearPath();
             ScaleVision(1f);
-            IsPsychic();
             timer = 0f;
         }
 
@@ -66,6 +67,7 @@ namespace Nightmare
         void OnDestroy()
         {
             nav.enabled = false;
+            EventManager.StopListening("Sound", HearPoint);
             StopPausible();
         }
 
@@ -88,7 +90,10 @@ namespace Nightmare
 
         private void HearPoint(Vector3 position)
         {
-            TestSense(position, hearingRange);
+            if (!playerDetected)
+            {
+                TestSense(position, hearingRange);
+            }
         }
 
         private void TestSense(Vector3 position, float senseRange)
@@ -120,14 +125,22 @@ namespace Nightmare
                 nav.SetDestination(position);
             }
         }
-
+        
         private void WanderOrIdle()
         {
             if (!nav.hasPath)
             {
                 if (timer <= 0f)
                 {
-                    SetDestination(GetRandomPoint(wanderDistance, 5));
+                    if (Random.value < psychicLevels)
+                    {
+                        SetDestination(transform.position + ((player.position - transform.position).normalized * wanderDistance));
+                    }
+                    else
+                    {
+                        SetDestination(GetRandomPoint(wanderDistance, 5));
+                    }
+
                     if (nav.pathStatus == NavMeshPathStatus.PathInvalid)
                     {
                         ClearPath();
@@ -141,14 +154,9 @@ namespace Nightmare
             }
         }
 
-        private void IsPsychic()
-        {
-            GoToPlayer();
-        }
-
         private Vector3 GetRandomPoint(float distance, int layermask)
         {
-            Vector3 randomPoint = UnityEngine.Random.insideUnitSphere * distance + this.transform.position;;
+            Vector3 randomPoint = UnityEngine.Random.insideUnitSphere * distance + this.transform.position;
 
             NavMeshHit navHit;
             NavMesh.SamplePosition(randomPoint, out navHit, distance, layermask);
@@ -169,13 +177,13 @@ namespace Nightmare
             return navHit.mask;
         }
 
-        //void OnDrawGizmos()
-        //{
-        //    Vector3 position = this.transform.position;
-        //    Gizmos.color = Color.red;
-        //    Gizmos.DrawWireSphere(position, currentVision);
-        //    Gizmos.color = Color.yellow;
-        //    Gizmos.DrawWireSphere(position, hearingRange);
-        //}
+        void OnDrawGizmos()
+        {
+            Vector3 position = this.transform.position;
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(position, currentVision);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(position, hearingRange);
+        }
     }
 }
