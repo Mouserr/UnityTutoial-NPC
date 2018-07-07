@@ -56,6 +56,14 @@ namespace Nightmare
 
         public void TakeDamage (int amount, Vector3 hitPoint)
         {
+            TakeDamage(amount);
+
+            hitParticles.transform.position = hitPoint;
+            hitParticles.Play();
+        }
+
+        public void TakeDamage(int amount)
+        {
             if (!IsDead())
             {
                 enemyAudio.Play();
@@ -70,9 +78,6 @@ namespace Nightmare
                     enemyMovement.GoToPlayer();
                 }
             }
-                
-            hitParticles.transform.position = hitPoint;
-            hitParticles.Play();
         }
 
         void Death ()
