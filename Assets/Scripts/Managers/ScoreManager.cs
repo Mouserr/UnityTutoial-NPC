@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System;
 
 namespace Nightmare
 {
@@ -9,6 +10,8 @@ namespace Nightmare
         public static int score;
         private int levelThreshhold;
         const int LEVEL_INCREASE = 300;
+
+        public static event Action LevelComplete;
 
         Text sText;
 
@@ -26,6 +29,11 @@ namespace Nightmare
             sText.text = "Score: " + score;
             if (score >= levelThreshhold)
             {
+                if (LevelComplete != null)
+                {
+                    LevelComplete();
+                }
+
                 AdvanceLevel();
             }
         }

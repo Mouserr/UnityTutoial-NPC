@@ -30,6 +30,7 @@ namespace Nightmare
             playerAudio = GetComponent<AudioSource>();
             playerMovement = GetComponent<PlayerMovement>();
             playerShooting = GetComponentInChildren<PlayerShooting>();
+            ScoreManager.LevelComplete += LevelComplete;
 
             ResetPlayer();
         }
@@ -65,6 +66,11 @@ namespace Nightmare
             damaged = false;
         }
 
+        public void LevelComplete()
+        {
+            anim.SetInteger("Score", ScoreManager.score);
+            anim.SetTrigger("LevelComplete");
+        }
 
         public void TakeDamage(int amount)
         {
